@@ -1,0 +1,7 @@
+*/config.js
+vercel/gd-tokens.js
+vercel/.now
+vercel/.vercel
+vercel/.gitignore
+workers/dist
+*/node_modules
