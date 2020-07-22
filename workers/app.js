@@ -1,8 +1,8 @@
 const CryptoJS = require('crypto-js')
 const Base64 = require('js-base64').Base64
-const config = require('./config')
+const aesPassword = require('./../vercel/config').password
 
-let gd, expires, access_token
+let accessToken
 
 addEventListener('fetch', event => {
     event.respondWith(handleRequest(event))
@@ -11,9 +11,7 @@ addEventListener('fetch', event => {
 async function handleRequest(event) {
     const request = event.request
 
-    if (gd == undefined) {
-        gd = new googleDrive()
-    }
+    const gd = new googleDrive()
 
     const url = new URL(request.url)
     let str = url.pathname.substr(1)
@@ -22,12 +20,14 @@ async function handleRequest(event) {
 
     try {
         str = Base64.decode(str)
-        fileId = CryptoJS.AES.decrypt(str, config.aesPassword).toString(CryptoJS.enc.Utf8)
+        fileId = CryptoJS.AES.decrypt(str, aesPassword).toString(CryptoJS.enc.Utf8)
     } catch (error) {
         return new Response(JSON.stringify({
             code: -2,
             msg: 'Access denied',
-            data: {}
+            data: {
+                msg: 'AES error'
+            }
         }), {
             status: 403
         })
@@ -37,6 +37,7 @@ async function handleRequest(event) {
         const result = fileId.split('||!||')
         const range = request.headers.get('Range')
 
+        accessToken = result[0]
         response = await gd.download(result[1], range)
 
         return response
@@ -44,10 +45,12 @@ async function handleRequest(event) {
         return new Response(JSON.stringify({
             code: -2,
             msg: 'Access denied',
-            data: {}
+            data: {
+                msg: 'parse error'
+            }
         }), {
             status: 403
-        });
+        })
     }
 }
 
@@ -72,28 +75,11 @@ class googleDrive {
         response.headers.delete('expires')
         response.headers.delete('date')
         response.headers.delete('content-disposition')
-        response.headers.delete('x-goog-hash')
-        response.headers.delete('vary')
-        response.headers.delete('server')
 
         return response
     }
 
-    async accessToken() {
-        if (expires == undefined || expires < Date.now()) {
-            let obj = await fetch(config.tokenAPI)
-            obj = await obj.json()
-
-            if (obj.access_token != undefined) {
-                access_token = obj.access_token
-                expires = Date.now() + 3500 * 1000
-            }
-        }
-        return access_token
-    }
-
     async requestOption(headers = {}, method = 'GET') {
-        const accessToken = await this.accessToken()
         headers['authorization'] = 'Bearer ' + accessToken
 
         return {

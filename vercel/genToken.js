@@ -15,4 +15,4 @@ for (const i in accounts) {
     tokens.push(file)
 }
 
-fs.writeFileSync('./gd-tokens.js', 'module.exports='+JSON.stringify(tokens))
+fs.writeFileSync('./gdTokens.js', 'module.exports='+JSON.stringify(tokens))

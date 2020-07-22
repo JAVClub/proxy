@@ -6,7 +6,9 @@ Workers 和 Vercel 上的代理脚本
 
 一开始是准备只使用 Workers 的, 但是奈何单账户很容易触发 ratelimit, 10ms 的 `CPU time` 又不足以计算 JWT
 
-后面准备换用 Vercel, 但是发现 Payload 有 Max 5MB 的限制, 所以只好做成现在这样, Vercel 分发 `access token`, Workers 代理文件
+~~后面准备换用 Vercel, 但是发现 Payload 有 Max 5MB 的限制, 所以只好做成现在这样, Vercel 分发 `access token`, Workers 代理文件~~
+
+更新后的布局是: 所有链接指向 Vercel, Vercel 再生成 access token 并 302 跳转至 Workers
 
 ### 准备
 
@@ -27,13 +29,13 @@ npm i
 npm i -g now webpack webpack-cli
 ```
 
-然后将准备到的 `Service Account` 文件们(格式如下)复制到本项目的 `vercel/accounts` 目录下, 然后在 `./vercel` 目录下运行 `node gen-tokens.js`
+然后部署 Workers, 进入 `./workers` 运行 `webpack app.js`, 将 `./workers/dist/main.js` 的内容部署至 Workers 即可
 
-接下来更改 `./vercel/config.js` 中的 `aesPassword` 字段(对应 core 中表述的 `secret`)
+再然后将准备到的 `Service Account` 文件们复制到本项目的 `vercel/accounts` 目录下, 然后在 `./vercel` 目录下运行 `node genTokens.js`
 
-最后在根目录执行 `now` 按提示部署至 Vercel 并记下 URL
+接下来更改 `./vercel/config.js` 中的 `password` 字段(对应 core 中表述的 `secret`)和其余的字段
 
-再然后部署 Workers, 进入 `./workers`, 修改 `config.js` 中的 `tokenAPI` 为刚刚部署的 Vercel URL, 然后运行 webpack app.js, 最后将 `./workers/dist/main.js` 的内容部署至 Workers 即可
+最后在根目录执行 `now` 按提示部署至 Vercel 并记下 URL 即可
 
 ## 免责声明
 
