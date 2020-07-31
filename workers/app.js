@@ -1,8 +1,9 @@
 const CryptoJS = require('crypto-js')
 const Base64 = require('js-base64').Base64
-const aesPassword = require('./../vercel/config').password
+const oAuth = null // || require('./config') // Needed if not using vercel
+const aesPassword = oAuth.aesPassword || require('./../vercel/config').password
 
-let accessToken
+let accessToken, oAuthToken = {}
 
 addEventListener('fetch', event => {
     event.respondWith(handleRequest(event))
@@ -57,7 +58,7 @@ async function handleRequest(event) {
 class googleDrive {
     async download(id, range) {
         const url = `https://www.googleapis.com/drive/v3/files/${id}?alt=media`
-        
+
         const requestOption = await this.requestOption()
 
         requestOption.headers['Range'] = range
@@ -80,12 +81,45 @@ class googleDrive {
     }
 
     async requestOption(headers = {}, method = 'GET') {
-        headers['authorization'] = 'Bearer ' + accessToken
+        headers['authorization'] = 'Bearer ' + ((!oAuth && accessToken) || await this.accessToken())
 
         return {
             method,
             headers
         }
+    }
+
+    async accessToken() {
+        if (oAuthToken.expires === undefined || oAuthToken.expires < Date.now()) {
+            const obj = await this.fetchAccessToken();
+            if (obj.access_token != undefined) {
+                oAuthToken.accessToken = obj.access_token;
+                oAuthToken.expires = Date.now() + 3500 * 1000;
+            }
+        }
+        return oAuthToken.accessToken;
+    }
+
+    async fetchAccessToken() {
+        const url = "https://www.googleapis.com/oauth2/v4/token";
+        const headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        };
+        const post_data = {
+            client_id: oAuth.client_id,
+            client_secret: oAuth.client_secret,
+            refresh_token: oAuth.refresh_token,
+            grant_type: 'refresh_token'
+        }
+
+        let requestOption = {
+            'method': 'POST',
+            'headers': headers,
+            'body': this.enQuery(post_data)
+        };
+
+        const response = await fetch(url, requestOption);
+        return await response.json();
     }
 
     enQuery(data) {
