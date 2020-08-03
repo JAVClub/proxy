@@ -1,7 +1,7 @@
 const CryptoJS = require('crypto-js')
 const Base64 = require('js-base64').Base64
-const oAuth = {} // || require('./config') // Needed if not using vercel
-const aesPassword = oAuth.aesPassword || require('./../vercel/config').password
+const oAuth = null // || require('./config') // Needed if not using vercel
+const aesPassword = (oAuth && oAuth.aesPassword) || require('./../vercel/config').password
 
 let accessToken, oAuthToken = {}
 
@@ -81,7 +81,7 @@ class googleDrive {
     }
 
     async requestOption(headers = {}, method = 'GET') {
-        headers['authorization'] = 'Bearer ' + ((!oAuth && accessToken) || await this.accessToken())
+        headers['authorization'] = 'Bearer ' + ((oAuth === null && accessToken) || await this.accessToken())
 
         return {
             method,
