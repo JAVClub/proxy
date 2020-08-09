@@ -31,7 +31,7 @@ npm i -g now webpack webpack-cli
 
 然后部署 Workers, 进入 `./workers` 运行 `webpack app.js`, 将 `./workers/dist/main.js` 的内容部署至 Workers 即可
 
-再然后将准备到的 `Service Account` 文件们复制到本项目的 `vercel/accounts` 目录下, 然后在 `./vercel` 目录下运行 `node genTokens.js`
+再然后将准备到的 `Service Account` 文件们复制到本项目的 `vercel/accounts` 目录下, 然后在 `./vercel` 目录下运行 `node genToken.js`
 
 接下来更改 `./vercel/config.js` 中的 `password` 字段(对应 core 中表述的 `secret`)和其余的字段
 
