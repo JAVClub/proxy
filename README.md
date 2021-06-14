@@ -2,6 +2,9 @@
 
 Workers 和 Vercel 上的代理脚本
 
+❗ | **因架构调整，本项目已不再维护并将存档。新项目将支持泛媒体文件管理，相关开发工作将迁移至 [@UsagiHouse](https://github.com/UsagiHouse) 进行，请知悉**
+:---: | :---
+
 ## More info -> [core](https://github.com/JAVClub/core)
 
 一开始是准备只使用 Workers 的, 但是奈何单账户很容易触发 ratelimit, 10ms 的 `CPU time` 又不足以计算 JWT
